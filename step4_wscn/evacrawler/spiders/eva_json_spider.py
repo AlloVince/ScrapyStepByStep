@@ -17,28 +17,27 @@ import hashlib
 
 
 class EvaJsonSpider(BaseSpider):
-    name = "douban"
-    allowed_domains = ["douban.com"]
+    name = "wscn"
+    allowed_domains = ["wallstreetcn.com"]
     start_urls = [
-        "http://api.douban.com/v2/movie/top250"
+        "http://api.wallstreetcn.com/apiv1/node.json"
     ]
     def parse(self, response):
         res = json.loads(response.body)
 
-        if not res['subjects']:
+        if not res:
             raise CloseSpider('Scrawl finished')
 
-        for subject in res['subjects']:
-            url = 'http://api.douban.com/v2/movie/subject/' + subject['id']
+        for subject in res:
+            url = subject['uri'] + '.json'
             yield Request(url, callback=self.parse_subject)
         
         next_page = list(urlparse.urlparse(response.url))
-        count = res['count']
         if next_page[4]:
             query = dict(urlparse.parse_qs(next_page[4]))
-            query['start'] = int(query['start'][0]) + count
+            query['page'] = int(query['page'][0]) + 1
         else:
-            query = {'start' : count}
+            query = {'page' : 1}
             
         next_page[4] = urllib.urlencode(query)
         next_page = urlparse.urlunparse(next_page)

@@ -1,3 +1,4 @@
 pymongo
 readability-lxml
 jieba
+-e git+https://github.com/charlax/wordpresslib.git@master#egg=wordpresslib

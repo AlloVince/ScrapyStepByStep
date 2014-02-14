@@ -8,6 +8,7 @@ from evacrawler.items import *
 from evacrawler import *
 from scrapy.conf import settings
 from scrapy import log
+import wordpresslib
 
 
 class MongoPipeline(object):
@@ -36,6 +37,20 @@ class MongoPipeline(object):
         if not settings['MONGODB_UNIQ_KEY'] or settings['MONGODB_UNIQ_KEY'] == "":
             return None
         return settings['MONGODB_UNIQ_KEY']
+
+class WordPressPipeline(object):
+    def __init__(self):
+        self.rpc = wordpresslib.WordPressClient(settings['WORDPRESS_API'], settings['WORDPRESS_USER'], settings['WORDPRESS_PASSWORD'])
+
+    def process_item(self, item, spider):
+        self.rpc.selectBlog(0)
+        article = item['raw']
+        post = wordpresslib.WordPressPost()
+        post.title = article['title']
+        post.description = article['body']['und'][0]['safe_value'] 
+        idPost = self.rpc.newPost(post, True)
+        return item
+
 
 class FilePipeline(object):
     def process_item(self, item, spider):
