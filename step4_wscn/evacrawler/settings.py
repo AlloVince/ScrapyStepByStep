@@ -14,14 +14,16 @@ ITEM_PIPELINES = {
 }
 
 
+DOWNLOAD_DELAY = 0.5
+
 
 
 ### Custom Settings
 
-MONGODB_SERVER = 'localhost'
+MONGODB_SERVER = '192.168.1.12'
 MONGODB_PORT = 27017
 MONGODB_DB = 'scrapy'
-MONGODB_COLLECTION = 'person_profiles'
+MONGODB_COLLECTION = 'wscn'
 MONGODB_UNIQ_KEY = '_id'
 
 DOWNLOAD_FILE_FOLDER = os.path.join(os.path.dirname(os.path.realpath(__file__)), "downloads")

@@ -13,6 +13,7 @@ from evacrawler import p
 from scrapy.exceptions import * 
 import urllib
 import json
+import hashlib
 
 
 class EvaJsonSpider(BaseSpider):
@@ -48,4 +49,6 @@ class EvaJsonSpider(BaseSpider):
         subject = json.loads(response.body)
         item['title'] = subject['title']
         item['url'] = response.url
+        item['raw'] = subject
+        item['_id'] = hashlib.md5(response.url).hexdigest()
         return [item]
