@@ -25,20 +25,40 @@ class TwitterJsonSpider(BaseSpider):
         "https://api.twitter.com/1.1/statuses/user_timeline.json?user_id=14939075"
     ]
 
-    def get_oauth_headers(self, url, method='GET', parameters={}):
+    def get_oauth_request(self, url, method='GET', parameters={}):
         config = settings['TWITTER']
 
         consumer = oauth.Consumer(config['consumer_key'], config['consumer_secret'])
         token = oauth.Token(config['token_key'], config['token_secret'])
+
+        url = urlparse.urlparse(url)._asdict()
+        parameters = dict(urlparse.parse_qsl(url['query']))
+        url['query'] = {}
+        url = urlparse.urlunparse(url.values())
+
+
         oauth_request = oauth.Request.from_consumer_and_token(consumer=consumer, token=token, http_method=method, http_url=url, parameters=parameters)
         oauth_request.sign_request(oauth.SignatureMethod_HMAC_SHA1(), consumer, token)
-        p(oauth_request.to_header())
-        return oauth_request.to_header()
+
+        schema, rest = urllib.splittype(url)
+        if rest.startswith('//'):
+            hierpart = '//'
+        else:
+            hierpart = ''
+        host, rest = urllib.splithost(rest)
+        realm = schema + ':' + hierpart + host
+
+        return {
+                'url' : url,
+                'parameters' : parameters,
+                'headers' :  oauth_request.to_header(realm=realm),
+        }
 
     def start_requests(self):
         requests = []
         for url in self.start_urls:
-            requests.append(Request(url=url, headers=self.get_oauth_headers(url, parameters={'user_id': '14939075'})))
+            oauth_request = self.get_oauth_request(url)
+            requests.append(Request(url=url, headers=oauth_request['headers']))
         return requests
 
 
