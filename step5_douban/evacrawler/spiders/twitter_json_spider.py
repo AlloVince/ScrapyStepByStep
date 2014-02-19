@@ -22,24 +22,23 @@ class TwitterJsonSpider(BaseSpider):
     name = "twitter"
     allowed_domains = ["twitter.com"]
     start_urls = [
-        "https://api.twitter.com/1.1/statuses/user_timeline.json"
+        "https://api.twitter.com/1.1/statuses/user_timeline.json?user_id=14939075"
     ]
 
-    oauth_headers = {} 
+    def get_oauth_headers(self, url, method='GET', parameters={}):
+        config = settings['TWITTER']
 
-    def get_oauth_headers(self):
-        if self.oauth_headers:
-            return self.oauth_headers
-
-        p(settings['TWITTER'])
-
-        headers = {}
-        return headers
+        consumer = oauth.Consumer(config['consumer_key'], config['consumer_secret'])
+        token = oauth.Token(config['token_key'], config['token_secret'])
+        oauth_request = oauth.Request.from_consumer_and_token(consumer=consumer, token=token, http_method=method, http_url=url, parameters=parameters)
+        oauth_request.sign_request(oauth.SignatureMethod_HMAC_SHA1(), consumer, token)
+        p(oauth_request.to_header())
+        return oauth_request.to_header()
 
     def start_requests(self):
         requests = []
-        for item in self.start_urls:
-            requests.append(Request(url=item, headers=self.get_oauth_headers()))
+        for url in self.start_urls:
+            requests.append(Request(url=url, headers=self.get_oauth_headers(url, parameters={'user_id': '14939075'})))
         return requests
 
 

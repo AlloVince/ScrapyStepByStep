@@ -1,0 +1,6 @@
+pymongo
+readability-lxml
+jieba
+-e git+https://github.com/charlax/wordpresslib.git@master#egg=wordpresslib
+-e git+https://github.com/simplegeo/python-oauth2.git@master#egg=oauth2
+-e git+https://github.com/kennethreitz/requests.git@master#egg=request
